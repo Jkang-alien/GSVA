@@ -1,5 +1,5 @@
 library('RTCGAToolbox')
-
+load('ann_chr3.RData')
 
 getFirehoseDatasets()
 getFirehoseRunningDates(last = NULL)
@@ -27,10 +27,15 @@ y <- lapply(y, `[`, -1:-2)
 #y <- lapply(y, function(x) x[-1]) # same as above
 es <- gsva(mRNA, y, method = 'ssgsea', rnaseq = TRUE )
 es_transpose_scale <- scale(t(es), center = TRUE, scale = TRUE)
+rownames(es_transpose_scale) <- gsub('-', '\\.', gsub('-...-...-....-..', '' , rownames(es_transpose_scale)))
+
+ann <- ann[match(rownames(es_transpose_scale), rownames(ann)),]
+
 
 library(NMF)
 aheatmap(es_transpose_scale,
-         hclustfun=function(d) hclust(d, method="ward.D2"))
+         hclustfun=function(d) hclust(d, method="ward.D2"),
+         annRow = ann)
 
 library(Cairo)
 CairoPDF(file = 'cibersort_TCGA.pdf',
